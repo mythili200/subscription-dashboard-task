@@ -1,15 +1,16 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Plans from "./pages/Plans";
-import Dashboard from "./pages/Dashboard";
-import AdminSubscriptions from "./pages/AdminSubscriptions";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ThemeProvider } from "./ThemeContext";
-import "./App.css";
 import ThemeBackground from "./ThemeBackround";
+import Loader from "./components/Loader";
+
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const Plans = lazy(() => import("./pages/Plans"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const AdminSubscriptions = lazy(() => import("./pages/AdminSubscriptions"));
 
 function App() {
   return (
@@ -17,28 +18,30 @@ function App() {
       <ThemeBackground />
       <BrowserRouter>
         <Navbar />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/plans" element={<Plans />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/subscriptions"
-            element={
-              <ProtectedRoute adminOnly={true}>
-                <AdminSubscriptions />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/" element={<Plans />} />
-        </Routes>
+        <Suspense fallback={<Loader />}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/plans" element={<Plans />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/subscriptions"
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminSubscriptions />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/" element={<Plans />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </ThemeProvider>
   );

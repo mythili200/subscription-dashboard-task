@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -11,8 +11,9 @@ import { Box } from "@mui/material";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { useNavigate } from "react-router-dom";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
-// Yup validation schema
 const schema = yup.object().shape({
   email: yup.string().email("Invalid email").required("Email is required"),
   password: yup
@@ -21,9 +22,17 @@ const schema = yup.object().shape({
     .required("Password is required"),
 });
 
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 export default function Login() {
   const dispatch = useDispatch();
   const nav = useNavigate();
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   const {
     register,
@@ -33,9 +42,13 @@ export default function Login() {
     resolver: yupResolver(schema),
   });
 
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbarOpen(false);
+  };
+
   const onSubmit = async (data) => {
     try {
-      // Login request
       const res = await api.post("/auth/login", {
         email: data.email,
         password: data.password,
@@ -43,7 +56,10 @@ export default function Login() {
 
       dispatch(setCredentials(res.data));
 
-      // Check if user has an active subscription
+      setSnackbarMessage("Login successful!");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+
       const subRes = await api.get("/subscriptions/my-subscription");
       if (!subRes.data || !subRes.data.plan) {
         nav("/plans");
@@ -51,7 +67,9 @@ export default function Login() {
         nav("/dashboard");
       }
     } catch (err) {
-      alert(err?.response?.data?.message || "Login failed");
+      setSnackbarMessage(err?.response?.data?.message || "Login failed");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
     }
   };
 
@@ -96,6 +114,17 @@ export default function Login() {
             Login
           </Button>
         </form>
+
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity}>
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </Box>
     </Container>
   );

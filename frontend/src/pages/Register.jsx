@@ -1,52 +1,69 @@
-import React from "react";
-import { useDispatch } from "react-redux";
-import api from "../api/axios";
-import { setCredentials } from "../store/authSlice";
-import Container from "@mui/material/Container";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import { Box, Typography } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import api from "../api/axios";
+import Container from "@mui/material/Container";
+import TextField from "@mui/material/TextField";
+import { Box } from "@mui/material";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import { useNavigate } from "react-router-dom";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
-// Yup validation schema
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
   password: yup
     .string()
-    .min(6, "Password must be at least 6 characters")
+    .min(6, "Password must be at least 6 chars")
     .required("Password is required"),
 });
 
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 export default function Register() {
-  const dispatch = useDispatch();
   const nav = useNavigate();
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
   });
 
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbarOpen(false);
+  };
+
   const onSubmit = async (data) => {
     try {
       const res = await api.post("/auth/register", data);
-      dispatch(setCredentials(res.data));
-      nav("/dashboard");
+      setSnackbarMessage("Registration successful!");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+
+      setTimeout(() => nav("/login"), 1500);
     } catch (err) {
-      alert(err?.response?.data?.message || "Register failed");
+      setSnackbarMessage(err?.response?.data?.message || "Registration failed");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
     }
   };
 
   return (
     <Container sx={{ mt: 4 }}>
       <Box sx={{ maxWidth: 380, mx: "auto" }}>
-        <Typography variant="h5" textAlign={"center"}>
+        <Typography variant="h4" textAlign="center" sx={{ mb: 3 }}>
           REGISTER
         </Typography>
 
@@ -57,7 +74,7 @@ export default function Register() {
             {...register("name")}
             error={!!errors.name}
             helperText={errors.name?.message}
-            sx={{ mt: 2 }}
+            sx={{ mb: 2 }}
           />
           <TextField
             fullWidth
@@ -65,7 +82,7 @@ export default function Register() {
             {...register("email")}
             error={!!errors.email}
             helperText={errors.email?.message}
-            sx={{ mt: 2 }}
+            sx={{ mb: 2 }}
           />
           <TextField
             fullWidth
@@ -74,24 +91,35 @@ export default function Register() {
             {...register("password")}
             error={!!errors.password}
             helperText={errors.password?.message}
-            sx={{ mt: 2 }}
+            sx={{ mb: 2 }}
           />
 
           <Button
             type="submit"
             variant="contained"
-            disabled={isSubmitting}
             sx={{
-              display: "block",
-              mt: 4,
+              mt: 2,
               backgroundColor: "#6B46C1",
               "&:hover": { backgroundColor: "#553C9A" },
+              display: "block",
               mx: "auto",
             }}
           >
-            {isSubmitting ? "Registering..." : "Register"}
+            Register
           </Button>
         </form>
+
+        {/* Snackbar */}
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity}>
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </Box>
     </Container>
   );
