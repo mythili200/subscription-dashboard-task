@@ -1,4 +1,4 @@
-# Subscription Management Dashboard (MERN + MUI)
+# Subscription Management Dashboard (MERN + MUI + THEME)
 
 This repository contains a sample MERN project (backend + frontend) for a subscription management dashboard.
 
