@@ -34,18 +34,18 @@ Admin credentials:
 
 ##### User Flow Explanation
 
-1. Landing / Plans Page
+1. Landing / Plans Page***
 When a new user visits the site, they are directed to the Plans page (/plans) where they can see available subscription plans.
 They can choose to Register if they don’t have an account yet.
 
-2. Registration
+2. Registration***
 The user clicks Register and fills in the registration form with email, password, and other required details.
 On successful registration:
 The user is automatically logged in.
 A success notification (snackbar) is displayed: “Registration successful!”.
 The user is redirected to the Plans page to choose a subscription.
 
-3.Login (Existing User)
+3.Login (Existing User)***
 Existing users can go to the Login page (/login) and enter their email and password.
 On successful login:
 A success notification is displayed: “Login successful!”.
@@ -53,18 +53,18 @@ The system checks if the user has an active subscription:
 If yes: Redirect to Dashboard (/dashboard).
 If no: Redirect to Plans (/plans) to select a subscription.
 
-4. Subscribing to a Plan
+4. Subscribing to a Plan)***
 On the Plans page, the user selects a plan.
 After subscribing:
 The subscription becomes active.
 Any previous active subscriptions are marked as expired automatically.
 The user is redirected to their Dashboard, where they can see their subscription details.
 
-5. Dashboard
+5. Dashboard***
 Shows active subscription details.
 Provides access to features based on the subscription.
 
-6. Admin Flow
+6. Admin Flow***
 Admin logs in using:
 Email: admin@example.com
 Password: admin123
@@ -72,8 +72,7 @@ Admin can access Admin Dashboard (/admin/subscriptions) to:
 View all users and their active subscriptions.
 monitor subscription status.
 
-8. Token & Security
-
+8. Token & Security***
 All authenticated requests use a JWT token stored in localStorage.
 Unauthorized access redirects the user to the Login page.
 
